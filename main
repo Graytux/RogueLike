@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 ########################## Var Init
 resize
 declare -A carte
@@ -33,16 +32,13 @@ T_SURLIGNE="\033[07m"
 T_MASQUE="\033[08m"
 T_BARRE="\033[09m"
 
-
 ########################## BackGround
 VIDE="."
 PJ="${T_GRAS}${T_CLIGN}${T_CYAN}@${R_COLOR}"
 NPC="${T_GRAS}${T_ORANGE}@${R_COLOR}"
 BORDMAP="${T_GRAS}${T_BLEU}#${R_COLOR}"
 
-
 ############################ Fonction ############################
-
 function InitCarte(){
 	xmax=$((LINES - 15))
 	ymax=$((COLUMNS - 50))
@@ -75,44 +71,44 @@ function Affichage() {
 function Game() {
 	while :
 	do
-        	read -t 1 -n 1 key
+        	read -r -t 1 -n 1 key
         	if [[ $key = m ]]; then
                 	break
         	elif [[ $key = z ]]; then
-			if [[ ${carte[$((xpos - 1)),$ypos]} = $VIDE ]]; then
+			if [[ ${carte[$((xpos - 1)),$ypos]} = "$VIDE" ]]; then
 				msg="You go to UP"
                 		carte[$xpos,$ypos]=$VIDE
-                		xpos=$(($xpos - 1))
+                		xpos=$((xpos - 1))
 				carte[$xpos,$ypos]=$PJ
 			else
 				msg="no way"
 			fi
                 	Affichage "${carte[@]}" "${msg}"
         	elif [[ $key = s ]]; then
-			if [[ ${carte[$((xpos + 1)),$ypos]} = $VIDE ]]; then
+			if [[ ${carte[$((xpos + 1)),$ypos]} = "$VIDE" ]]; then
 				msg="You go to DOWN"
                 		carte[$xpos,$ypos]=$VIDE
-                		xpos=$(($xpos + 1))
+                		xpos=$((xpos + 1))
                 		carte[$xpos,$ypos]=$PJ
 			else
 				msg="no way"
 			fi
                 	Affichage "${carte[@]}" "${msg}"
         	elif [[ $key = q ]]; then
-			if [[ ${carte[$xpos,$((ypos - 1))]} = $VIDE ]]; then
+			if [[ ${carte[$xpos,$((ypos - 1))]} = "$VIDE" ]]; then
 				msg="You go to LEFT"
                 		carte[$xpos,$ypos]=$VIDE
-                		ypos=$(($ypos - 1))
+                		ypos=$((ypos - 1))
                 		carte[$xpos,$ypos]=$PJ
 			else
 				msg="no way"
 			fi
                 	Affichage "${carte[@]}" "${msg}"
         	elif [[ $key = d ]]; then
-			if [[ ${carte[$xpos,$((ypos + 1))]} = $VIDE ]]; then
+			if [[ ${carte[$xpos,$((ypos + 1))]} = "$VIDE" ]]; then
 				msg="You go to RIGHT"
                 		carte[$xpos,$ypos]=$VIDE
-                		ypos=$(($ypos + 1))
+                		ypos=$((ypos + 1))
                 		carte[$xpos,$ypos]=$PJ
 			else
 				msg="no way"
@@ -122,9 +118,7 @@ function Game() {
 	done
 }
 
-
 ############################## Main ##############################
-
 InitCarte "${carte[@]}"
 Affichage "${carte[@]}"
 Game "${carte[@]}"

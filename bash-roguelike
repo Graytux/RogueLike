@@ -1,1 +1,3 @@
+#!/bin/bash
+
 xterm -rv -title "Bash : RogueLike" -geometry 150x50 -e ./main
