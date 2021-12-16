@@ -69,6 +69,7 @@ function Affichage() {
 	echo -e "=> ${msg}"
 }
 function Game() {
+        Affichage "${carte[@]}"
 	while :
 	do
         	read -r -t 1 -n 1 key
@@ -120,7 +121,6 @@ function Game() {
 
 ############################## Main ##############################
 InitCarte "${carte[@]}"
-Affichage "${carte[@]}"
 Game "${carte[@]}"
 
 exit 0
