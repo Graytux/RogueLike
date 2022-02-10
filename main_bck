@@ -2,49 +2,52 @@
 
 ########################## Var Init
 resize
+term_largeur=$(tput cols)
+term_hauteur=$(tput lines)
+
 declare -A carte
 msg=""
 
-########################## Color & Font
-
-########################## BackGround
 export PT_STA="@"
-export PT_STO="."
-export PJ="$(tput setaf 4)@$(tput sgr0)"
-export VIDE=" "
+export PJ=""$(tput setaf 4)"@"$(tput sgr0)""
+export VIDE="."
 export OBJT=$VIDE
 export xpos=0
 export ypos=0
-export xmax=$((LINES - 15))
-export ymax=$((COLUMNS - 50))
+export xmax=35
+export ymax=100
+#export xmax=$((term_largeur - 15))
+#export ymax=$((term_hauteur - 50))
 export LAB=0
 
 ############################ Fonction
 function InitCarte() {
+	clear;
+	echo -e "\n\n\tGeneration carte : en cours"
 	export CSV="./data/level/${LAB}.csv"
 	xpos=$(grep "$PT_STA" "$CSV" | awk -F ":" '{print $1}')
 	ypos=$(grep "$PT_STA" "$CSV" | awk -F ":" '{print $2}')
-	wc -l $CSV
-	for ELT in $(cat $CSV); do
-		x=$(echo "$ELT" | awk -F ":" '{print $1}')
-		y=$(echo "$ELT" | awk -F ":" '{print $2}')
-		obj=$(echo "$ELT" | awk -F ":" '{print $3}')
-		carte[$x,$y]=$obj
-	done
-}
-function Affichage() {
-	clear
 	for x in $(seq 0 "$xmax"); do
-		tmpligne=""
-		for y in $(seq 0 "$ymax"); do
-			tmpligne+=${carte[$x,$y]}
-		done
-		env printf "${tmpligne}\n"
-	done
-	env printf "actions [z-up]  [s-down]  [q-left]  [d-right]  [m-quit]\n=> ${msg}"
+        for y in $(seq 0 "$ymax"); do
+			obj=$(grep "$x:$y:" $CSV | awk -F ":" '{print $3}')
+			carte[$x,$y]=$obj
+        done
+    done
 }
+
+function Affichage() {
+	for x in $(seq 0 "$xmax"); do
+		for y in $(seq 0 "$ymax"); do
+			printf ""$(tput cup $x $y)"${carte[$x,$y]}"
+		done
+	done
+	printf ""$(tput cup $((xmax + 2)) 0)"actions [z-up]  [s-down]  [q-left]  [d-right]  [m-quit]"
+	printf ""$(tput cup $((xmax + 3)) 0)"=> "
+}
+
 function Game() {
-    Affichage "${carte[@]}"
+	Affichage "${carte[@]}"
+	tput sc
 	while :
 		do
         	read -r -t 1 -n 1 key
@@ -54,48 +57,61 @@ function Game() {
 				if [[ ${carte[$((xpos - 1)),$ypos]} = "$VIDE" ]]; then
 					msg="You go to UP"
 					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					xpos=$((xpos - 1))
 					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
 					msg="no way"
 				fi
-				Affichage "${carte[@]}" "${msg}"
+				printf $(tput cup $((xmax + 3)) 0)"=> ${msg}"
+				tput rc
         	elif [[ $key = s ]]; then
 				if [[ ${carte[$((xpos + 1)),$ypos]} = "$VIDE" ]]; then
 					msg="You go to DOWN"
 					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					xpos=$((xpos + 1))
 					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
 					msg="no way"
 				fi
-				Affichage "${carte[@]}" "${msg}"
+				printf $(tput cup $((xmax + 3)) 0)"=> ${msg}"
+				tput rc
         	elif [[ $key = q ]]; then
 				if [[ ${carte[$xpos,$((ypos - 1))]} = "$VIDE" ]]; then
 					msg="You go to LEFT"
 					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					ypos=$((ypos - 1))
 					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
 					msg="no way"
 				fi
-				Affichage "${carte[@]}" "${msg}"
+				printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+				tput rc
         	elif [[ $key = d ]]; then
 				if [[ ${carte[$xpos,$((ypos + 1))]} = "$VIDE" ]]; then
 					msg="You go to RIGHT"
 					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					ypos=$((ypos + 1))
 					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
 					msg="no way"
 				fi
-				Affichage "${carte[@]}" "${msg}"
+				printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+				tput rc
         	fi
 	done
 }
 
 ############################## Main ##############################
 InitCarte "${carte[@]}"
+tput clear
 Game "${carte[@]}"
 
 exit 0

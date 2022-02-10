@@ -1,0 +1,114 @@
+#!/bin/bash
+
+########################## Var Init
+declare -A carte
+export msg=""
+export OBJ=""
+export VIDE=" "
+export PJ=""$(tput setaf 4)"@"$(tput sgr0)""
+export END=""$(tput setaf 5)"s"$(tput sgr0)""
+export LVL=0
+export CSV="./data/level/${LVL}.csv"
+
+
+############################ Fonction
+function InitCarte() {
+    tput clear
+    export xpos=$(grep "init" $CSV | awk -F ":" '{print $2}')
+    export ypos=$(grep "init" $CSV | awk -F ":" '{print $3}')
+    export xmax=$(grep "init" $CSV | awk -F ":" '{print $4}')
+    export ymax=$(grep "init" $CSV | awk -F ":" '{print $5}')
+	export xend=$(grep "end" $CSV | awk -F ":" '{print $2}')
+	export yend=$(grep "end" $CSV | awk -F ":" '{print $3}')
+    echo -e "\nGeneration carte [$xmax x $ymax]\n\t- level : $LVL\n\t- start : $xpos,$ypos"
+    for x in $(seq 0 "$xmax"); do
+        for y in $(seq 0 "$ymax"); do
+            OBJ=$(grep "$x:$y:" $CSV | grep -v "init" | grep -v "end" | awk -F ":" '{print $3}')
+            carte[$x,$y]=$OBJ
+        done
+    done
+    carte[$xpos,$ypos]=$PJ
+	carte[$xend,$yend]=$END
+	tput clear
+}
+
+function Affichage() {
+	for x in $(seq 0 "$xmax"); do
+		for y in $(seq 0 "$ymax"); do
+			printf ""$(tput cup $x $y)"${carte[$x,$y]}"
+		done
+	done
+	printf ""$(tput cup $((xmax + 2)) 0)"actions [z-up]  [s-down]  [q-left]  [d-right]  [m-quit]"
+	printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+	tput sc
+}
+function Mouvement() {
+	printf ""$(tput cup $xpos $ypos)"$VIDE"
+	carte[$xpos,$ypos]=$VIDE
+	echo $direction
+	if [[ $direction -eq "up" ]]; then
+		msg="You go to UP"
+		xpos=$((xpos - 1))
+	elif [[ $direction -eq "down" ]]; then
+		msg="You go to DOWN"
+		xpos=$((xpos + 1))
+	elif [[ $direction -eq "left" ]]; then
+		msg="You go to LEFT"
+		ypos=$((ypos - 1))
+	elif [[ $direction -eq "right" ]]; then
+		msg="You go to RIGHT"
+		ypos=$((ypos + 1))
+	elif [[ $direction -eq "nothing" ]]; then
+		msg="no way"
+	fi
+	printf ""$(tput cup $xpos $ypos)"$PJ"
+	carte[$xpos,$ypos]=$PJ
+	printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+	direction="nothing"
+	tput rc
+}
+
+function Game() {
+	Affichage "${carte[@]}"
+	while :
+	do
+		read -r -t 1 -n 1 key
+		if [[ $key = m ]]; then
+			break
+		elif [[ $key = z ]]; then
+			if [[ ${carte[$((xpos - 1)),$ypos]} = "$VIDE" ]]; then
+				direction="up"
+				Mouvement "up"
+			else
+				Mouvement
+			fi
+		elif [[ $key = s ]]; then
+			if [[ ${carte[$((xpos + 1)),$ypos]} = "$VIDE" ]]; then
+				direction="down"
+				Mouvement "down"
+			else
+				Mouvement
+			fi
+		elif [[ $key = q ]]; then
+			if [[ ${carte[$xpos,$((ypos - 1))]} = "$VIDE" ]]; then
+				direction="left"
+				Mouvement "left"
+			else
+				Mouvement
+			fi
+		elif [[ $key = d ]]; then
+			if [[ ${carte[$xpos,$((ypos + 1))]} = "$VIDE" ]]; then
+				direction="right"
+				Mouvement "right"
+			else
+				Mouvement
+			fi
+		fi
+	done
+}
+
+############################## Main ##############################
+InitCarte "${carte[@]}"
+Game "${carte[@]}"
+
+exit 0

@@ -1,0 +1,31 @@
+#!/bin/bash
+
+########################## Var Init
+resize
+declare -A carte
+
+########################## Color & Font
+
+########################## BackGround
+export HG='\u2554'
+export HD='\u2557'
+export BG='\u255A'
+export BD='\u255D'
+export HZ='\u2550'
+export VT='\u2551'
+export TB='\u2566'
+export TH='\u2569'
+export TG='\u2563'
+export TD='\u2560'
+export CR='\u256C'
+
+############################ Fonction
+function InitCarte() {
+	export MAP="./data/dungeon/${ETG}.map"
+	export CSV="./data/level/${ETG}.csv"
+}
+############################## Main ##############################
+InitCarte "${carte[@]}"
+
+
+exit 0
