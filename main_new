@@ -2,25 +2,26 @@
 
 ########################## Var Init
 declare -A carte
-export msg=""
+export msg="                                                "
 export OBJ=""
 export VIDE=" "
 export PJ=""$(tput setaf 4)"@"$(tput sgr0)""
 export END=""$(tput setaf 5)"s"$(tput sgr0)""
 export LVL=0
-export CSV="./data/level/${LVL}.csv"
-
+export RLVL=0
+export key=0
 
 ############################ Fonction
 function InitCarte() {
     tput clear
+	export CSV="./data/level/${LVL}.csv"
     export xpos=$(grep "init" $CSV | awk -F ":" '{print $2}')
     export ypos=$(grep "init" $CSV | awk -F ":" '{print $3}')
     export xmax=$(grep "init" $CSV | awk -F ":" '{print $4}')
     export ymax=$(grep "init" $CSV | awk -F ":" '{print $5}')
 	export xend=$(grep "end" $CSV | awk -F ":" '{print $2}')
 	export yend=$(grep "end" $CSV | awk -F ":" '{print $3}')
-    echo -e "\nGeneration carte [$xmax x $ymax]\n\t- level : $LVL\n\t- start : $xpos,$ypos"
+    echo -e "\nGeneration carte - ${CSV} : [$xmax x $ymax]\n\t- level : $LVL\n\t- start : $xpos,$ypos"
     for x in $(seq 0 "$xmax"); do
         for y in $(seq 0 "$ymax"); do
             OBJ=$(grep "$x:$y:" $CSV | grep -v "init" | grep -v "end" | awk -F ":" '{print $3}')
@@ -38,6 +39,7 @@ function Affichage() {
 			printf ""$(tput cup $x $y)"${carte[$x,$y]}"
 		done
 	done
+	printf ""$(tput cup $((xmax + 1)) 0)"Etage : ${LVL}"
 	printf ""$(tput cup $((xmax + 2)) 0)"actions [z-up]  [s-down]  [q-left]  [d-right]  [m-quit]"
 	printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
 	tput sc
@@ -52,54 +54,94 @@ function Game() {
         	if [[ $key = m ]]; then
                 	break
         	elif [[ $key = z ]]; then
-				if [[ ${carte[$((xpos - 1)),$ypos]} = "$VIDE" ]]; then
-					msg="You go to UP"
+				if [[ ${carte[$((xpos - 1)),$ypos]} = "$END" ]]; then
+					msg="You pass level ${LVL} to $((LVL + 1))"
+					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					xpos=$((xpos - 1))
+					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+					LVL=$((LVL + 1))
+					break
+				elif [[ ${carte[$((xpos - 1)),$ypos]} = "$VIDE" ]]; then
+					msg="You go to UP                        "
 					carte[$xpos,$ypos]=$VIDE
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					xpos=$((xpos - 1))
 					carte[$xpos,$ypos]=$PJ
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
-					msg="no way"
+					msg="no way                                 "
 				fi
 				printf $(tput cup $((xmax + 3)) 0)"=> ${msg}"
 				tput rc
         	elif [[ $key = s ]]; then
-				if [[ ${carte[$((xpos + 1)),$ypos]} = "$VIDE" ]]; then
-					msg="You go to DOWN"
+				if [[ ${carte[$((xpos + 1)),$ypos]} = "$END" ]]; then
+					msg="You pass level ${LVL} to $((LVL + 1))"
+					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					xpos=$((xpos + 1))
+					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+					LVL=$((LVL + 1))
+					break
+				elif [[ ${carte[$((xpos + 1)),$ypos]} = "$VIDE" ]]; then
+					msg="You go to DOWN                        "
 					carte[$xpos,$ypos]=$VIDE
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					xpos=$((xpos + 1))
 					carte[$xpos,$ypos]=$PJ
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
-					msg="no way"
+					msg="no way                                 "
 				fi
 				printf $(tput cup $((xmax + 3)) 0)"=> ${msg}"
 				tput rc
         	elif [[ $key = q ]]; then
-				if [[ ${carte[$xpos,$((ypos - 1))]} = "$VIDE" ]]; then
-					msg="You go to LEFT"
+				if [[ ${carte[$xpos,$((ypos - 1))]} = "$END" ]]; then
+					msg="You pass level ${LVL} to $((LVL + 1))"
+					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					ypos=$((ypos - 1))
+					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+					LVL=$((LVL + 1))
+					break
+				elif [[ ${carte[$xpos,$((ypos - 1))]} = "$VIDE" ]]; then
+					msg="You go to LEFT                         "
 					carte[$xpos,$ypos]=$VIDE
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					ypos=$((ypos - 1))
 					carte[$xpos,$ypos]=$PJ
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
-					msg="no way"
+					msg="no way                                 "
 				fi
 				printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
 				tput rc
         	elif [[ $key = d ]]; then
-				if [[ ${carte[$xpos,$((ypos + 1))]} = "$VIDE" ]]; then
-					msg="You go to RIGHT"
+				if [[ ${carte[$xpos,$((ypos + 1))]} = "$END" ]]; then
+					msg="You pass level ${LVL} to $((LVL + 1))"
+					carte[$xpos,$ypos]=$VIDE
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					ypos=$((ypos + 1))
+					carte[$xpos,$ypos]=$PJ
+					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
+					printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
+					LVL=$((LVL + 1))
+					break
+				elif [[ ${carte[$xpos,$((ypos + 1))]} = "$VIDE" ]]; then
+					msg="You go to RIGHT                     "
 					carte[$xpos,$ypos]=$VIDE
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 					ypos=$((ypos + 1))
 					carte[$xpos,$ypos]=$PJ
 					printf ""$(tput cup $xpos $ypos)"${carte[$xpos,$ypos]}"
 				else
-					msg="no way"
+					msg="no way                                 "
 				fi
 				printf ""$(tput cup $((xmax + 3)) 0)"=> ${msg}"
 				tput rc
@@ -108,7 +150,13 @@ function Game() {
 }
 
 ############################## Main ##############################
-InitCarte "${carte[@]}"
-Game "${carte[@]}"
-
+while :
+do
+	RLVL=${LVL}
+	InitCarte "${carte[@]}"
+	Game "${carte[@]}"
+	if [[ $key = m ]]; then
+        break
+	fi
+done
 exit 0
