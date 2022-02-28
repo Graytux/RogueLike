@@ -1,4 +1,4 @@
 #!/bin/bash
 CO=150
 LI=50
-xterm -rv -title "Bash : RogueLike" -geometry ${CO}x${LI} -e ./main_new
+xterm -rv -title "Bash : RogueLike" -geometry ${CO}x${LI} -e ./main
